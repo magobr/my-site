@@ -2,7 +2,8 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const dotenv = require('dotenv').config();
 
-let routeGet = require('./routes/get');
+const routeGet = require('./routes/get');
+const routePost = require('./routes/post');
 
 const app = express();
 
@@ -23,8 +24,9 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.json());
 
 app.use(routeGet);
+app.use(routePost);
 
-var port = process.env.PORT;
+var port = process.env.PORT || 3000;
 var server = process.env.SERVER;
 app.listen(port, () => {
 	console.log(`Servidor aberto! acesse: http://${server}:${port}`);

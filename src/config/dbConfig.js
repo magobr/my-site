@@ -1,4 +1,3 @@
-
 const mysql = require('mysql');
 const dotenv = require('dotenv').config();
 
@@ -6,14 +5,19 @@ var host = process.env.HOST;
 var db_user = process.env.DB_USER;
 var db_pass = process.env.DB_PASS;
 var db_base = process.env.DB_BASE;
+var port_host = process.env.PORT_HOST_DB;
 
 const connection = mysql.createConnection({
     host     : host,
     user     : db_user,
     password : db_pass,
-    database : db_base
+    database : db_base,
+    port     : port_host
 });
 
-connection.connect();
+connection.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected!"); 
+});
 
 module.exports = connection;
