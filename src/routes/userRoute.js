@@ -5,14 +5,14 @@ const userModel = require('../model/userModel');
 
 user.post('/join', (req, res) =>{
 
-    var dados = req.body;
+    var data = req.body;
    
     if (!req.session.loggedin) {
         console.log("Realize o Login");
         res.end();
     } else {
-        userModel.userJoin(dados, (error, response)=>{
-            console.log(dados);
+        userModel.userJoin(data, (error, response)=>{
+            console.log(data);
             if (error) throw error;
             res.json(response)
         });    
@@ -22,12 +22,12 @@ user.post('/join', (req, res) =>{
 user.post('/session', (req, res)=>{
     let md5 = require('md5');
 
-    let dados = {
+    let data = {
         user_name: req.body.user_name,
         user_pass: md5(req.body.user_pass)
     }
     
-    userModel.userLogin(dados, (error, response)=>{       
+    userModel.userLogin(data, (error, response) => {       
         if(response.length > 0){
             req.session.loggedin = true;
             req.session.userId = response[0].user_ID;

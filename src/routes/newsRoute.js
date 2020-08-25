@@ -57,27 +57,60 @@ news.delete('/deletenew/:id', (req, res)=>{
         res.end();
     }else{
         let userId = req.session.userId;
+        let newsId = req.params.id;
 
-        newsModel.listNewsByUser(userId, (error, response)=>{
+        newsModel.allByIdNews(newsId, (error, response) => {
             if (error) throw error;
-            if( response.length > 0 ){
-                let id = req.params.id;
-                newsModel.deleteNews(id, (error, response)=>{
-                    if ( !response.affectedRows > 0) {
-                        if (error) throw error;
-                        res.end();
-                        console.log('Não existe essa notícia');
-                    } else {
-                        console.log(response.affectedRows);
-                        res.end();
-                    }
-                });
-            } else {
+            if( !response.length > 0 ) {
+                console.log('Não existe essa notícia');
+                res.end();                
+            }
+            if( response[0].user_ID !== userId ) {      
                 console.log('Sem premição para excluir');
                 res.end();
+            } else {
+                newsModel.deleteNews(newsId, (error, response) => {
+                    if (error) throw error;
+                    console.log(response.affectedRows, "Noticia deletada");
+                    res.end();
+                });
             }
         });
     }
-})
+});
+
+news.put('/editnews/:id',  (req, res)=>{
+    if(!req.session.loggedin)
+    {
+        console.log('Realize o Login');
+        res.end();
+    } else
+    {
+        let userId = req.session.userId;
+        let newsId = req.params.id;
+
+        newsModel.allByIdNews(newsId, (error, response) => {
+            if (error) throw error;
+            if( !response.length > 0 ) {
+                console.log('Não existe essa notícia');
+                res.end();                
+            }
+            if( response[0].user_ID !== userId ) {   
+                console.log('Sem premição para editar');
+                res.end();
+            } else {
+
+                let data = req.body;
+                newsModel.editNews(data, newsId, (error, response) => {
+                    console.log(data);
+                    if (error) throw error;
+                    console.log(response.affectedRows, "Noticia Alterada");
+                    res.end()
+                });
+            }
+        });
+    }
+});
+
 
 module.exports = news;

@@ -39,6 +39,26 @@ const newsModel = {
             callback
         )
     },
+    allByIdNews:(newsId, callback)=>{
+        connection.query(
+            'SELECT newsID, user_ID, news_title, news_content, news_image, news_date, user_name, user_profile FROM mysite_news INNER JOIN mysite_user ON mysite_news.news_userID = mysite_user.user_ID WHERE newsID = ?;',
+            newsId,
+            callback
+        )
+    },
+    editNews:(data, newsId, callback) => {
+        connection.query(
+            'UPDATE mysite_news SET news_title = ?, news_content = ?, news_image = ?, news_date = ? WHERE newsID = ?;',
+            [
+                data.news_title,
+                data.news_content,
+                data.news_image, 
+                data.news_date,
+                newsId,
+            ],
+            callback
+        )
+    },
 }
 
 module.exports = newsModel;
