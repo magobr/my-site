@@ -1,20 +1,25 @@
 const express = require('express');
+const multer = require('multer');
+const multerConfig = require('../config/multer');
 const news = express.Router();
 
 const newsModel = require('../model/newsModel');
 
-news.post('/createnew',  (req, res)=>{
+news.post('/createnew', multer(multerConfig).single("news_image"), async (req, res)=>{
 
     if (!req.session.loggedin) {
         console.log("Realize o Login");
         res.end();
     } else {
 
+        let userId = req.session.userId;
+        const { originalname: name, size, key, location: url = "" } = req.file;
+
         let data  = {
             news_title: req.body.news_title,
             news_content: req.body.news_content,
-            news_image: req.body.news_image,
-            news_userID: req.session.userId,
+            news_image: req.file.filename,
+            news_userID: userId,
             news_date: newsModel.currentDate()
         };
 
