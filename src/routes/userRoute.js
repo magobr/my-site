@@ -11,11 +11,21 @@ user.post('/join', (req, res) =>{
         console.log("Realize o Login");
         res.end();
     } else {
-        userModel.userJoin(data, (error, response)=>{
-            console.log(data);
-            if (error) throw error;
-            res.json(response)
-        });    
+        let userId = req.session.userId;
+                
+        userModel.checksAdmin(userId, (error, response) =>{
+            if( error ) throw error;
+
+            if (!response.length > 0) {
+                console.log('Sem permição para criar usuário');
+                res.end()
+            } else {
+                userModel.userJoin(data, (error, response)=>{
+                    if (error) throw error;
+                    res.json(response)
+                });
+            }
+        });
     }
 });
 

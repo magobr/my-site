@@ -6,6 +6,13 @@ const newsModel = {
         var localdate = dNow.getFullYear() + '-' + (dNow.getMonth()+1) + '-' + dNow.getDate();
         return localdate;
     },
+    checksAdmin:(data, callback)=>{
+        connection.query(
+            'SELECT user_profile FROM mysite_user where user_profile = 1 AND user_ID = ?',
+            data,
+            callback
+        );
+    },
     insertNews:(data, callback) => {
         connection.query(
             'INSERT INTO mysite_news (news_title, news_content, news_image, news_userID, news_date) VALUES (?, ?, ?, ?, ?);',

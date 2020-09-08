@@ -3,13 +3,13 @@ const news = express.Router();
 
 const newsModel = require('../model/newsModel');
 
-
 news.post('/createnew',  (req, res)=>{
 
     if (!req.session.loggedin) {
         console.log("Realize o Login");
         res.end();
-    } else{
+    } else {
+
         let data  = {
             news_title: req.body.news_title,
             news_content: req.body.news_content,
@@ -30,11 +30,24 @@ news.get('/listnews', (req, res)=>{
     if (!req.session.loggedin) {
         console.log('Realize o Login');
         res.end();
-    }else{
-        newsModel.listNews((error, response)=>{
-            if (error) throw error;
-            res.json(response);
-        })
+    } else {
+
+        let userId = req.session.userId;
+
+        newsModel.checksAdmin(userId, (error, response) => {
+            if(error) throw error;
+            
+            if( !response.length > 0 ){
+                console.log('Sem permição para ver o conteúdo');
+                res.end();
+            } else {
+                newsModel.listNews((error, response)=>{
+                    if (error) throw error;
+                    res.json(response);
+                });
+            }
+
+        });
     }
 });
 
@@ -55,7 +68,7 @@ news.delete('/deletenew/:id', (req, res)=>{
     if(!req.session.loggedin){
         console.log('Realize o Login');
         res.end();
-    }else{
+    } else {
         let userId = req.session.userId;
         let newsId = req.params.id;
 
@@ -64,49 +77,85 @@ news.delete('/deletenew/:id', (req, res)=>{
             if( !response.length > 0 ) {
                 console.log('Não existe essa notícia');
                 res.end();                
-            }
-            if( response[0].user_ID !== userId ) {      
-                console.log('Sem premição para excluir');
-                res.end();
             } else {
-                newsModel.deleteNews(newsId, (error, response) => {
-                    if (error) throw error;
-                    console.log(response.affectedRows, "Noticia deletada");
+
+                if( response[0].user_ID !== userId ) {      
+                    console.log('Não é o dono da notícia');
+    
+                    newsModel.checksAdmin(userId, (error, response) => {
+                        if (error) throw error;
+    
+                        if( !response.length > 0 ) {
+                            console.log('Não é Admin, Não tem permição');
+                            res.end();                
+                        } else {
+                            newsModel.deleteNews(newsId, (error, response) => {
+                                if (error) throw error;
+                                
+                                console.log(response.affectedRows, 'Noticia deletada');
+                                res.end();
+                            });
+                            
+                        }
+                    });
                     res.end();
-                });
+                } else {
+                    newsModel.deleteNews(newsId, (error, response) => {
+                        if (error) throw error;
+                        
+                        console.log(response.affectedRows, 'Noticia deletada');
+                        res.end();
+                    });
+                }
             }
         });
     }
 });
 
 news.put('/editnews/:id',  (req, res)=>{
-    if(!req.session.loggedin)
-    {
+    if(!req.session.loggedin){
         console.log('Realize o Login');
         res.end();
-    } else
-    {
+    } else {
         let userId = req.session.userId;
         let newsId = req.params.id;
+        let data = req.body;
 
         newsModel.allByIdNews(newsId, (error, response) => {
             if (error) throw error;
             if( !response.length > 0 ) {
                 console.log('Não existe essa notícia');
                 res.end();                
-            }
-            if( response[0].user_ID !== userId ) {   
-                console.log('Sem premição para editar');
-                res.end();
             } else {
 
-                let data = req.body;
-                newsModel.editNews(data, newsId, (error, response) => {
-                    console.log(data);
-                    if (error) throw error;
-                    console.log(response.affectedRows, "Noticia Alterada");
-                    res.end()
-                });
+                if( response[0].user_ID !== userId ) {      
+                    console.log('Não é o dono da notícia');
+    
+                    newsModel.checksAdmin(userId, (error, response) => {
+                        if (error) throw error;
+    
+                        if( !response.length > 0 ) {
+                            console.log('Não é Admin, Não tem permição');
+                            res.end();                
+                        } else {
+                            newsModel.editNews(data, newsId, (error, response) => {
+                                if (error) throw error;
+                                
+                                console.log(response.affectedRows, 'Noticia Alterada');
+                                res.end();
+                            });
+                            
+                        }
+                    });
+                    res.end();
+                } else {
+                    newsModel.editNews(data, newsId, (error, response) => {
+                        if (error) throw error;
+                        
+                        console.log(response.affectedRows, 'Noticia Alterada');
+                        res.end();
+                    });
+                }
             }
         });
     }
