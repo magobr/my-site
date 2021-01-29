@@ -2,15 +2,13 @@ const express = require('express');
 
 const routeGet = express.Router();
 
-routeGet.get('/' , (req, res)=>{
-    (async () => {
-        const testemodel = require('../model/testemodel')
-        console.log('Começou!');
+routeGet.get('/' , async (req, res)=>{
+
+    const getController = require('../controller/getController')
+    const teste = await getController.get()
     
-        console.log('SELECT * FROM user');
-        const clientes = await testemodel.selectCustomers();
-        res.json(clientes[1].id)
-    })();
+    res.json(teste);
+
 })
 
 module.exports = routeGet;
